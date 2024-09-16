@@ -19,6 +19,8 @@ public class TelemetryTest extends OpMode {
 
         double right_x = gamepad1.right_stick_x;
         double right_y = -gamepad1.right_stick_y;   // inverting values to make positive up
+        double right_x_reduced = gamepad1.right_stick_x / 3;
+        double right_y_reduced = -gamepad1.right_stick_y / 3;
 
         boolean right_bumper = gamepad1.right_bumper;
 
@@ -27,6 +29,10 @@ public class TelemetryTest extends OpMode {
         telemetry.addData("Left Y: ", left_y);
         telemetry.addData("Left X Reduced: ", left_x_reduced);
         telemetry.addData("Left Y Reduced: ", left_y_reduced);
+        telemetry.addData("Right X: ", right_x);
+        telemetry.addData("Right Y: ", right_y);
+        telemetry.addData("Right X Reduced: ", right_x_reduced);
+        telemetry.addData("Right Y Reduced: ", right_y_reduced);
         telemetry.addData("Right Bumper pressed: ", right_bumper);
 
     }
