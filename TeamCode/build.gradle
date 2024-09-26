@@ -27,5 +27,6 @@ dependencies {
     implementation project(':FtcRobotController')
     implementation 'org.ftclib.ftclib:core:2.1.1'
     implementation fileTree(dir: 'C:\\Users\\iannp\\StudioProjects\\Into-The-Deep-2025\\TeamCode\\lib', include: ['*.aar', '*.jar'], exclude: [])
+    implementation files('/Users/ian/StudioProjects/IntoTheDeep2025/libs/TeamCode-release.aar')
     // core
 }
