@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.hardware.motors.Motor.Encoder;
+import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.arcrobotics.ftclib.kinematics.HolonomicOdometry;
 import com.arcrobotics.ftclib.kinematics.Odometry;
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds;
@@ -35,6 +38,9 @@ public class Mecanum2025 extends BaseMecanumDrive {
     private Encoder m_right;
     private Encoder m_perpendicular;
     private double m_initialangledegrees;
+    private double encoderRadiusCentimeters = 2.4;
+    private double ticksPerRevolution = 2000.0;
+
     public Mecanum2025(HardwareMap hardwareMap, MecanumConfigs mecanumConfigs, Pose2d initialPose, Alliance alliance) {
         super(hardwareMap, mecanumConfigs, initialPose, alliance);
 
@@ -52,9 +58,12 @@ public class Mecanum2025 extends BaseMecanumDrive {
         m_robotPose = initialPose;
         m_initialangledegrees = initialPose.getRotation().getDegrees();
 
-        //  m_left = m_frontLeft.encoder;
-        // set left and right encoder to motors 0 and 1.
-        //TODO figure out what motor each encoder corresponds to
+        double cm_per_tick = 2 * Math.PI * encoderRadiusCentimeters / ticksPerRevolution;
+        m_left = m_frontRight.encoder.setDistancePerPulse(cm_per_tick);
+        m_left.setDirection(MotorEx.Direction.REVERSE);
+        m_right = m_frontLeft.encoder.setDistancePerPulse(cm_per_tick);
+        m_right.setDirection(MotorEx.Direction.REVERSE);
+        m_perpendicular = m_backLeft.encoder.setDistancePerPulse(cm_per_tick);
     }
 
 
@@ -73,7 +82,6 @@ public class Mecanum2025 extends BaseMecanumDrive {
         m_robotPose = pose;
     }
 
-    @Override
     public void setTargetPose(Pose2d pose2d) {              // getting target x and y coords + rotation based on function input
         m_translationXController.setSetPoint(pose2d.getX());
         m_translationYController.setSetPoint(pose2d.getY());
@@ -89,7 +97,7 @@ public class Mecanum2025 extends BaseMecanumDrive {
         return atTarget && atRotation;
     }
 
-    @Override
+
     public void moveWithPID() {
         double vX = MathUtil.clamp(m_translationXController.calculate(m_robotPose.getX()),
                 -m_mecanumConfigs.getMaxRobotSpeedMps(),
@@ -112,14 +120,14 @@ public class Mecanum2025 extends BaseMecanumDrive {
         move(speeds);
     }
 
-    @Override
+
     public void resetPIDs() {
         m_translationXController.clearTotalError();
         m_translationYController.clearTotalError();
         m_rotationController.clearTotalError();
     }
 
-    @Override
+
     public void tunePIDs() {
         m_translationXController.setPID(Mecanum2025Params.TranslationX.p, Mecanum2025Params.TranslationX.i, Mecanum2025Params.TranslationX.d);
         m_translationYController.setPID(Mecanum2025Params.TranslationY.p, Mecanum2025Params.TranslationY.i, Mecanum2025Params.TranslationY.d);
@@ -132,5 +140,12 @@ public class Mecanum2025 extends BaseMecanumDrive {
         m_odometry.updatePose();
         double currentAngle = m_initialangledegrees - m_odometry.getPose().getRotation().getDegrees();              // initial degrees minus minus clockwise cords
         m_robotPose = new Pose2d(m_odometry.getPose().getTranslation(), Rotation2d.fromDegrees(currentAngle));      // updating robot pose
+
+        TelemetryPacket driveInformation = new TelemetryPacket();
+        driveInformation.put("Left Encoder", m_left.getDistance());
+        driveInformation.put("Left Encoder", m_right.getDistance());
+        driveInformation.put("Left Encoder", m_perpendicular.getDistance());
+        //TODO GO TO FTC DASHBOARD TO VIEW
+        FtcDashboard.getInstance().sendTelemetryPacket(driveInformation);
     }
 }
