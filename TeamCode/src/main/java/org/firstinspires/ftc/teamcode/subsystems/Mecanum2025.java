@@ -43,6 +43,13 @@ public class Mecanum2025 extends BaseMecanumDrive {
 
     public Mecanum2025(HardwareMap hardwareMap, MecanumConfigs mecanumConfigs, Pose2d initialPose, Alliance alliance) {
         super(hardwareMap, mecanumConfigs, initialPose, alliance);
+        resetFeedForward(0.7589123691243396,0.0005748005410399633);
+        double cm_per_tick = 2 * Math.PI * encoderRadiusCentimeters / ticksPerRevolution;
+        m_left = m_frontRight.encoder.setDistancePerPulse(cm_per_tick);
+        m_left.setDirection(MotorEx.Direction.REVERSE);
+        m_right = m_frontLeft.encoder.setDistancePerPulse(cm_per_tick * -1);
+        m_right.setDirection(MotorEx.Direction.REVERSE);
+        m_perpendicular = m_backLeft.encoder.setDistancePerPulse(cm_per_tick * -1);
 
         m_odometry = new HolonomicOdometry(
                 m_left::getDistance,        // calls functions to get distance
@@ -58,12 +65,7 @@ public class Mecanum2025 extends BaseMecanumDrive {
         m_robotPose = initialPose;
         m_initialangledegrees = initialPose.getRotation().getDegrees();
 
-        double cm_per_tick = 2 * Math.PI * encoderRadiusCentimeters / ticksPerRevolution;
-        m_left = m_frontRight.encoder.setDistancePerPulse(cm_per_tick);
-        m_left.setDirection(MotorEx.Direction.REVERSE);
-        m_right = m_frontLeft.encoder.setDistancePerPulse(cm_per_tick);
-        m_right.setDirection(MotorEx.Direction.REVERSE);
-        m_perpendicular = m_backLeft.encoder.setDistancePerPulse(cm_per_tick);
+
     }
 
 
@@ -88,7 +90,7 @@ public class Mecanum2025 extends BaseMecanumDrive {
         m_rotationController.setSetPoint(pose2d.getRotation().getDegrees());
     }
 
-    @Override
+
     public boolean atTargetPose() {
 
         boolean atTarget = m_translationXController.atSetPoint() && m_translationYController.atSetPoint();
@@ -143,9 +145,9 @@ public class Mecanum2025 extends BaseMecanumDrive {
 
         TelemetryPacket driveInformation = new TelemetryPacket();
         driveInformation.put("Left Encoder", m_left.getDistance());
-        driveInformation.put("Left Encoder", m_right.getDistance());
-        driveInformation.put("Left Encoder", m_perpendicular.getDistance());
-        //TODO GO TO FTC DASHBOARD TO VIEW
+        driveInformation.put("Right Encoder", m_right.getDistance());
+        driveInformation.put("Perpendicular Encoder", m_perpendicular.getDistance());
+
         FtcDashboard.getInstance().sendTelemetryPacket(driveInformation);
     }
 }

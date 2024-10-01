@@ -23,4 +23,8 @@ android {
     namespace = 'com.qualcomm.ftcrobotcontroller'
 }
 
+dependencies {
+    implementation files('C:\\Users\\inp55\\StudioProjects\\IntoTheDeep2025\\libs\\TeamCode-release.aar')
+}
+
 apply from: '../build.dependencies.gradle'
